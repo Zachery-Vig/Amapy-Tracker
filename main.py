@@ -63,26 +63,28 @@ def menu():
     print("3) Check tracked urls")
     x = input(">")
     if x == "1":
+        print("Enter C to Cancel")
         url = input("ENTER URL: ")
-        try:
-            url_status_code = requests.head(url, headers=HEADERS).status_code
-            if url_status_code != 200 and url_status_code != 405:
-                print("ERROR: URL returned status code: " + str(url_status_code))
-            elif not("amazon" in url):
-                print("ERROR: not a valid amazon URL")
-            else:
-                print("Adding url please wait...")
-                File = open("url.txt", "a")
-                File.write(url + "\n")
-                File.close()
-                important_data = get_data(url, False)
-                File2 = open("pre_url_data.txt", "a")
-                File2.write(important_data[0] + " " + important_data[1] + "\n")
-                File2.close()
-                print("URL added to tracker")
-                input("PRESS ENTER")
-        except:
-            print("ERROR: Invalid URL")
+        if url.lower() != "c":
+            try:
+                url_status_code = requests.head(url, headers=HEADERS).status_code
+                if url_status_code != 200 and url_status_code != 405:
+                    print("ERROR: URL returned status code: " + str(url_status_code))
+                elif not("amazon" in url):
+                    print("ERROR: not a valid amazon URL")
+                else:
+                    print("Adding url please wait...")
+                    File = open("url.txt", "a")
+                    File.write(url + "\n")
+                    File.close()
+                    important_data = get_data(url, False)
+                    File2 = open("pre_url_data.txt", "a")
+                    File2.write(important_data[0] + " " + important_data[1] + "\n")
+                    File2.close()
+                    print("URL added to tracker")
+                    input("PRESS ENTER")
+            except:
+                print("ERROR: Invalid URL")
     elif x == "2":
         num = 1
         f = open("url.txt", "r")
