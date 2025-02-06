@@ -110,7 +110,6 @@ def menu():
     elif x == "3":
         File2 = open("pre_url_data.txt", "r")
         pre_url_data = [a.split() for a in File2.readlines()]
-        print(pre_url_data)
         File2.close()
         File = open("url.txt", "r")
         for num, line in enumerate(File.readlines()):
