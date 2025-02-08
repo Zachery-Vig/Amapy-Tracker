@@ -46,6 +46,7 @@ def get_data(URL, print_data=True):
     except AttributeError:
         sale = "None"
 
+    #Prints out all the data if applicable and returns trackable data like availablity and sales info.
     if (print_data):
         print("Full Data:")
         print("Product Title: ", title_string)
@@ -54,10 +55,11 @@ def get_data(URL, print_data=True):
         print("Total Reviews: ", review_count)
         print("Availability: ", available)
         print("Sale: ", sale)
+    
     return [available, sale]
 
-def menu(print_data=False):
-    if not print_data:
+def menu(startup_data=False):
+    if not startup_data:
         print("*** AMAPY TRACKER ***")
         print("1) Add new url to tracker")
         print("2) Remove url from tracker")
@@ -78,17 +80,16 @@ def menu(print_data=False):
                     print("ERROR: not a valid amazon URL")
                 else:
                     print("Adding url please wait...")
-                    File = open("data/url.txt", "a")
-                    File.write(url + "\n")
-                    File.close()
+                    #appends url to url file and adds trackable data to previous url data file
+                    with open("data/url.txt", "a") as file:
+                        file.write(url + "\n")
                     important_data = get_data(url, False)
-                    File2 = open("data/pre_url_data.txt", "a")
-                    File2.write(important_data[0] + " " + important_data[1] + "\n")
-                    File2.close()
+                    with open("data/pre_url_data.txt", "a") as file:
+                        file.write(important_data[0] + " " + important_data[1] + "\n")
                     print("URL added to tracker")
-                    input("PRESS ENTER")
             except:
                 print("ERROR: Invalid URL")
+            input("PRESS ENTER")
     elif x == "2":
         num = 1
         f = open("data/url.txt", "r")
@@ -101,73 +102,66 @@ def menu(print_data=False):
             print(str(num) + ") Cancel")
             x = int(input(">"))
             if x > 0 and x < num:
-                with open("data/url.txt", "w") as f:
+                #If the users selection is valid the url data and previous url data files have the line with the url removed (more like adds every url back except the one removed)
+                with open("data/url.txt", "w") as file:
                     for num, line in enumerate(lines):
                         if num != x-1:
-                            f.write(line)
-                with open("data/pre_url_data.txt", "w") as f:
+                            file.write(line)
+                with open("data/pre_url_data.txt", "w") as file:
                     for num, line in enumerate(lines):
                         if num != x-1:
-                            f.write(line)
+                            file.write(line)
                 print("URL Removed from tracker")
         else:
             print("No URLs in tracker...")
-            input("PRESS ENTER")
-    elif x == "3" or print_data:
-        print_data = False
-        File2 = open("data/pre_url_data.txt", "r")
-        pre_url_data = [a.split() for a in File2.readlines()]
-        File2.close()
-        File = open("data/url.txt", "r")
-        for num, line in enumerate(File.readlines()):
-            print("Getting Data...\n")
-            important_data = get_data(line)
-            print("\nImportant Changes:")
-            if important_data[1] != pre_url_data[num][1]:
-                print("The sale value has changed from " + pre_url_data[num][1] + " to " + important_data[1])
-                f = open("data/pre_url_data.txt", "r")
-                lines2 = f.readlines()
-                f.close()
-                with open("data/pre_url_data.txt", "w") as f:
-                    for num2, line2 in enumerate(lines2):
-                        if num == num2:
-                            f.write(important_data[0] + " " + important_data[1] + "\n")
-                        else:
-                            f.write(line2)
-                            
-            if important_data[0] != pre_url_data[num][0]:
-                print("The availability has changed from " + pre_url_data[num][0] + " to " + important_data[0])
-                f = open("data/pre_url_data.txt", "r")
-                lines2 = f.readlines()
-                f.close()
-                with open("data/pre_url_data.txt", "w") as f:
-                    for num2, line2 in enumerate(lines2):
-                        if num == num2:
-                            f.write(important_data[0] + " " + important_data[1] + "\n")
-                        else:
-                            f.write(line2)
+        input("PRESS ENTER")
+    elif x == "3" or startup_data: #Executes if user prompts or if startup data setting is on
+        startup_data = False
+        with open("data/pre_url_data.txt", "r") as file:
+            pre_url_data = [a.split() for a in file.readlines()]
 
-            if important_data[0] == pre_url_data[num][0] and important_data[1] == pre_url_data[num][1]:
-                print("No Changes found")
+        with open("data/url.txt", "r") as file:
+            for num, line in enumerate(file.readlines()):
+                print("Getting Data...\n")
+                important_data = get_data(line)
+
+                print("\nImportant Changes:")
+                #Checks for any discrepancys between data just fetched from website and data within the previous url data file.
+                if important_data[1] != pre_url_data[num][1]:
+                    print("The sale value has changed from " + pre_url_data[num][1] + " to " + important_data[1])
+
+                if important_data[0] != pre_url_data[num][0]:
+                    print("The availability has changed from " + pre_url_data[num][0] + " to " + important_data[0])
+
+                if important_data == pre_url_data[num]:
+                    print("No Changes found")
+                else:
+                    #If their was discrepencys previous url data file is written with data just seen by user
+                    with open("data/pre_url_data.txt", "r") as f:
+                        lines = f.readlines()
+                    with open("data/pre_url_data.txt", "w") as f:
+                        for num2, line2 in enumerate(lines):
+                            if num == num2:
+                                f.write(important_data[0] + " " + important_data[1] + "\n")
+                            else:
+                                f.write(line2)
             input("PRESS ENTER")
-        File.close()
     elif x == "4":
         with open("data/settings.txt", "r") as file:
-            data_startup_status = file.readlines()[0] == "ON"
-        if data_startup_status:
-            print("1) Toggle Show URL Data on Start - ON")
-        else:
-            print("1) Toggle Show URL Data on Start - OFF")
+            data_startup_status = file.readlines()[0]
+        print("1) Toggle Show URL Data on Start - " + data_startup_status)
         print("2) Cancel")
         x = input(">")
         if x == "1":
             with open("data/settings.txt", "w") as file:
-                if (data_startup_status):
+                #Controls if url data is printed out on program start
+                if (data_startup_status=="ON"):
                     file.write("OFF")
                     print("Show URL Data on Start set to off")
                 else:
                     file.write("ON")
                     print("Show URL Data on Start set to on")
+                input("PRESS ENTER")
     menu()
 
 if __name__ == '__main__':
