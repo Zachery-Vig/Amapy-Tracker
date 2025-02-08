@@ -56,12 +56,16 @@ def get_data(URL, print_data=True):
         print("Sale: ", sale)
     return [available, sale]
 
-def menu():
-    print("*** AMAPY TRACKER ***")
-    print("1) Add new url to tracker")
-    print("2) Remove url from tracker")
-    print("3) Check tracked urls")
-    x = input(">")
+def menu(print_data=False):
+    if not print_data:
+        print("*** AMAPY TRACKER ***")
+        print("1) Add new url to tracker")
+        print("2) Remove url from tracker")
+        print("3) Check tracked urls")
+        print("4) Settings")
+        x = input(">")
+    else:
+        x = ""
     if x == "1":
         print("Enter C to Cancel")
         url = input("ENTER URL: ")
@@ -74,11 +78,11 @@ def menu():
                     print("ERROR: not a valid amazon URL")
                 else:
                     print("Adding url please wait...")
-                    File = open("url.txt", "a")
+                    File = open("data/url.txt", "a")
                     File.write(url + "\n")
                     File.close()
                     important_data = get_data(url, False)
-                    File2 = open("pre_url_data.txt", "a")
+                    File2 = open("data/pre_url_data.txt", "a")
                     File2.write(important_data[0] + " " + important_data[1] + "\n")
                     File2.close()
                     print("URL added to tracker")
@@ -87,7 +91,7 @@ def menu():
                 print("ERROR: Invalid URL")
     elif x == "2":
         num = 1
-        f = open("url.txt", "r")
+        f = open("data/url.txt", "r")
         lines = f.readlines()
         if len(lines) != 0:
             print("Select URL to remove:")
@@ -97,11 +101,11 @@ def menu():
             print(str(num) + ") Cancel")
             x = int(input(">"))
             if x > 0 and x < num:
-                with open("url.txt", "w") as f:
+                with open("data/url.txt", "w") as f:
                     for num, line in enumerate(lines):
                         if num != x-1:
                             f.write(line)
-                with open("pre_url_data.txt", "w") as f:
+                with open("data/pre_url_data.txt", "w") as f:
                     for num, line in enumerate(lines):
                         if num != x-1:
                             f.write(line)
@@ -109,21 +113,22 @@ def menu():
         else:
             print("No URLs in tracker...")
             input("PRESS ENTER")
-    elif x == "3":
-        File2 = open("pre_url_data.txt", "r")
+    elif x == "3" or print_data:
+        print_data = False
+        File2 = open("data/pre_url_data.txt", "r")
         pre_url_data = [a.split() for a in File2.readlines()]
         File2.close()
-        File = open("url.txt", "r")
+        File = open("data/url.txt", "r")
         for num, line in enumerate(File.readlines()):
             print("Getting Data...\n")
             important_data = get_data(line)
             print("\nImportant Changes:")
             if important_data[1] != pre_url_data[num][1]:
                 print("The sale value has changed from " + pre_url_data[num][1] + " to " + important_data[1])
-                f = open("pre_url_data.txt", "r")
+                f = open("data/pre_url_data.txt", "r")
                 lines2 = f.readlines()
                 f.close()
-                with open("pre_url_data.txt", "w") as f:
+                with open("data/pre_url_data.txt", "w") as f:
                     for num2, line2 in enumerate(lines2):
                         if num == num2:
                             f.write(important_data[0] + " " + important_data[1] + "\n")
@@ -132,10 +137,10 @@ def menu():
                             
             if important_data[0] != pre_url_data[num][0]:
                 print("The availability has changed from " + pre_url_data[num][0] + " to " + important_data[0])
-                f = open("pre_url_data.txt", "r")
+                f = open("data/pre_url_data.txt", "r")
                 lines2 = f.readlines()
                 f.close()
-                with open("pre_url_data.txt", "w") as f:
+                with open("data/pre_url_data.txt", "w") as f:
                     for num2, line2 in enumerate(lines2):
                         if num == num2:
                             f.write(important_data[0] + " " + important_data[1] + "\n")
@@ -146,7 +151,28 @@ def menu():
                 print("No Changes found")
             input("PRESS ENTER")
         File.close()
+    elif x == "4":
+        with open("data/settings.txt", "r") as file:
+            data_startup_status = file.readlines()[0] == "ON"
+        if data_startup_status:
+            print("1) Toggle Show URL Data on Start - ON")
+        else:
+            print("1) Toggle Show URL Data on Start - OFF")
+        print("2) Cancel")
+        x = input(">")
+        if x == "1":
+            with open("data/settings.txt", "w") as file:
+                if (data_startup_status):
+                    file.write("OFF")
+                    print("Show URL Data on Start set to off")
+                else:
+                    file.write("ON")
+                    print("Show URL Data on Start set to on")
     menu()
 
 if __name__ == '__main__':
-    menu()
+    with open("data/settings.txt", "r") as file:
+        if file.readlines()[0] == "ON":
+            menu(True)
+        else:
+            menu()
